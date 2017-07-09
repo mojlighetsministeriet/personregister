@@ -1,0 +1,8 @@
+[package]
+authors = ["Tobychev <tobychev@live.com>"]
+name = "personregister"
+version = "0.1.0"
+
+[dependencies]
+rocket = "0.2.8"
+rocket_codegen = "0.2.8"
