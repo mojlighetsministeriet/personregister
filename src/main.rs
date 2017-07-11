@@ -1,3 +1,44 @@
+#![feature(plugin)]
+#![plugin(rocket_codegen)]
+
+extern crate rocket;
+extern crate serde_json;
+
+#[macro_use] extern crate uuid;
+#[macro_use] extern crate rocket_contrib;
+#[macro_use] extern crate serde_derive;
+
+use rocket_contrib::{JSON, Value};
+use rocket::State;
+use uuid::Uuid;
+use rocket_contrib::UUID;
+
+#[derive(Serialize,Deserialize)]
+struct Message {
+    id: Option<Uuid>,
+    contents: String
+}
+
 fn main() {
-    println!("Hello, world!");
+    rocket::ignite().mount("/", routes![index,person]).launch()
+}
+
+#[get("/")]
+fn index() -> &'static str {
+    "
+    USAGE
+
+      GET /person/<id>
+
+          retrieves the content for the person with id `<id>`
+    "
+}
+
+
+#[get("/person/<id>")]
+fn person(id: UUID) -> Option<JSON<Message>> {
+   Some( JSON( Message {
+        contents: "whatevs".to_string(),
+        id: Some(*id)}) 
+       )
 }
