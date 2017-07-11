@@ -4,5 +4,7 @@ name = "personregister"
 version = "0.1.0"
 
 [dependencies]
+diesel = { version = "0.13.0", features = ["mysql"] }
+diesel_codegen = { version = "0.13.0", features = ["mysql"] }
 rocket = "0.2.8"
 rocket_codegen = "0.2.8"
