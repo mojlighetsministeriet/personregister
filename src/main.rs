@@ -8,10 +8,11 @@ extern crate serde_json;
 #[macro_use] extern crate rocket_contrib;
 #[macro_use] extern crate serde_derive;
 
-use rocket_contrib::{JSON, Value};
-use rocket::State;
+
+
 use uuid::Uuid;
-use rocket_contrib::UUID;
+use rocket_contrib::{JSON, Value, UUID};
+use rocket::State;
 
 #[derive(Serialize,Deserialize)]
 struct Message {
