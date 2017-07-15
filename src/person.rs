@@ -25,9 +25,7 @@ pub struct Person {
 impl Person {
     pub fn get(id: Uuid, conn: &MysqlConnection) -> Result<Person,diesel::result::Error> {
         let pers_id = id.hyphenated().to_string();
-        let result = personer.find(&pers_id).limit(1).get_result::<Person>(conn);
-        println!("Got id {:?}, found {:?}",pers_id, result);
-        return result;
+        personer.find(&pers_id).limit(1).get_result::<Person>(conn)
     }
 
 }

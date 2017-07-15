@@ -1,16 +1,16 @@
 #![feature(plugin, custom_derive, custom_attribute)]
 #![plugin(rocket_codegen)]
 
+extern crate uuid;
 extern crate rocket;
+extern crate rocket_contrib;
 extern crate serde_json;
 extern crate r2d2;
 extern crate r2d2_diesel_mysql;
 extern crate dotenv;
 
-#[macro_use] extern crate uuid;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_codegen;
-#[macro_use] extern crate rocket_contrib;
 #[macro_use] extern crate serde_derive;
 
 
@@ -18,8 +18,7 @@ mod person;
 mod db;
 
 use uuid::Uuid;
-use rocket::State;
-use rocket_contrib::{JSON, Value, UUID};
+use rocket_contrib::{JSON, UUID};
 use person::Person;
 
 
