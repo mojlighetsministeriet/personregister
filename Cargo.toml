@@ -4,22 +4,32 @@ name = "personregister"
 version = "0.1.0"
 
 [dependencies]
+dotenv = "0.10.1"
+r2d2 = "0.7"
 rocket = "0.2.9"
 rocket_codegen = "0.2.9"
 serde = "0.9"
 serde_derive = "0.9"
 serde_json = "1.0.2"
-uuid = { version = "0.4.0", features = ["serde"]}
 
 [dependencies.diesel]
-version = "0.13.0"
 features = ["mysql"]
+version = "0.12.0"
 
 [dependencies.diesel_codegen]
-version = "0.13.0"
 features = ["mysql"]
+version = "0.12.0"
+
+[dependencies.r2d2-diesel-mysql]
+# The real version is broken for mysql
+#version = "0.14"
+git = "https://github.com/Ameobea/r2d2-diesel" 
 
 [dependencies.rocket_contrib]
-version = "0.2.9"
 default-features = false
-features = ["json","uuid"]
+features = ["json", "uuid"]
+version = "0.2.9"
+
+[dependencies.uuid]
+features = ["serde"]
+version = "0.4.0"
