@@ -13,20 +13,15 @@ extern crate dotenv;
 #[macro_use] extern crate diesel_codegen;
 #[macro_use] extern crate serde_derive;
 
-
 mod person;
 mod db;
 
-use uuid::Uuid;
 use rocket_contrib::{JSON, UUID};
-use person::Person;
+use person::{Person, ClientPerson};
 
+type GetPersonReply = Option<JSON<Person>>;
+type JsonPerson = JSON<ClientPerson>;
 
-#[derive(Serialize,Deserialize)]
-struct Message {
-    id: Option<Uuid>,
-    contents: Person
-}
 
 #[get("/")]
 fn index() -> &'static str {
@@ -36,21 +31,45 @@ fn index() -> &'static str {
       GET /person/<id>
 
           retrieves the content for the person with id `<id>`
+
+      PUT /person/<id> 
+
+          Updates properties of the person identified by the 
+          supplied id with the given values. Properties to be
+          updated should be sent as json encoded property:value
+          pairs.
     "
 }
 
 #[get("/person/<id>")]
-fn person(id: UUID, conn: db::Conn) -> Option<JSON<Message>> {
-//   let found 
+fn person(id: UUID, conn: db::Conn) -> GetPersonReply {
     match Person::get(*id, &conn) {
-        Ok(found) => Some( JSON( Message { contents: found, id: Some(*id)}) ),
+        Ok(found) => Some( JSON( found ) ),
         Err(_)    => None 
     }
 }
 
+#[post("/person/<id>", format = "application/json", data = "<persondata>")]
+fn create_person(id: UUID, persondata: JSON<ClientPerson>, conn: db::Conn) -> () { // GetPersonReply {
+   /* match Person::create(persondata.0, &conn) {
+        Ok(found) => Some( JSON( found ) ),
+        Err(_)    => None 
+    } */
+}
+
+
+#[put("/person/<id>", format = "application/json", data = "<persondata>")]
+fn update_person(id: UUID, persondata: JSON<ClientPerson>, conn: db::Conn) -> GetPersonReply {
+    match ClientPerson::update(persondata.0, *id, &conn) {
+        Ok(found) => Some( JSON( found ) ),
+        Err(_)    => None 
+    }
+}
+
+
 fn main() {
     rocket::ignite()
         .manage(db::init_pool())
-        .mount("/", routes![index,person])
+        .mount("/", routes![index,person,create_person,update_person])
         .launch();
 }
