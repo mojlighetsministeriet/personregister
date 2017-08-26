@@ -53,7 +53,7 @@ impl Person {
 
     pub fn create(new_person: ClientPerson, name: String, conn: &MysqlConnection) ->  PersonResult {
         let (newcomer,new_id) = Person::new_from_client(new_person,name);
-        diesel::insert(&newcomer).into(person::table).execute(conn);
+        diesel::insert(&newcomer).into(person::table).execute(conn)?;
         Person::get(new_id, conn)
     }
 
@@ -77,9 +77,7 @@ pub struct ClientPerson {
 impl ClientPerson {
     pub fn update(mut target: ClientPerson, id: Uuid, conn: &MysqlConnection) -> PersonResult {
         target.uuid = Some(id.hyphenated().to_string());
-        diesel::update(person::table).set(&target).execute(conn);
+        diesel::update(person::table).set(&target).execute(conn)?;
         Person::get(id,conn)
-//        target.save_changes::<Person>(conn)
-//
     }
 }

@@ -13,15 +13,17 @@ extern crate dotenv;
 #[macro_use] extern crate diesel_codegen;
 #[macro_use] extern crate serde_derive;
 
+mod api_error;
 mod person;
 mod db;
 
-use rocket_contrib::{JSON, UUID};
+use rocket::Request;
+use rocket_contrib::{JSON, UUID, SerdeError};
 use person::{Person, ClientPerson};
+use api_error::ApiError as ApiErrors;
 
-type GetPersonReply = Option<JSON<Person>>;
-type JsonPerson = JSON<ClientPerson>;
-
+type GetPersonReply = Result<JSON<Person>,ApiErrors>;
+type ParsedJsonPerson = Result<JSON<ClientPerson>, SerdeError>;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -43,27 +45,42 @@ fn index() -> &'static str {
 
 #[get("/person/<id>")]
 fn person(id: UUID, conn: db::Conn) -> GetPersonReply {
-    match Person::get(*id, &conn) {
-        Ok(found) => Some( JSON( found ) ),
-        Err(_)    => None 
-    }
+    let result = Person::get(*id, &conn)?;
+    Ok(JSON(result))
 }
 
-#[post("/person/<id>", format = "application/json", data = "<persondata>")]
-fn create_person(id: UUID, persondata: JSON<ClientPerson>, conn: db::Conn) -> () { // GetPersonReply {
-   /* match Person::create(persondata.0, &conn) {
-        Ok(found) => Some( JSON( found ) ),
-        Err(_)    => None 
-    } */
+
+#[post("/person", format = "application/json", data = "<persondata>")]
+fn create_person(persondata: ParsedJsonPerson, conn: db::Conn) -> GetPersonReply {
+    let persondata = match persondata {
+        Ok(data) => data,
+        Err(_) => return Err(ApiErrors::InvalidJsonError)   };
+
+    let new_name = match persondata.0.namn {
+        Some(ref name) if name.len() > 0 => persondata.0.namn.clone(),
+        None                             => return Err(ApiErrors::EmptyNameError),
+        _                                => return Err(ApiErrors::EmptyNameError)   };
+
+    let result = Person::create(persondata.0, new_name.unwrap(), &conn)?;
+    Ok( JSON(result) )    
 }
 
 
 #[put("/person/<id>", format = "application/json", data = "<persondata>")]
-fn update_person(id: UUID, persondata: JSON<ClientPerson>, conn: db::Conn) -> GetPersonReply {
-    match ClientPerson::update(persondata.0, *id, &conn) {
-        Ok(found) => Some( JSON( found ) ),
-        Err(_)    => None 
-    }
+fn update_person(id: UUID, persondata: ParsedJsonPerson, conn: db::Conn) -> GetPersonReply {
+    let persondata = match persondata { 
+        Ok(data)  => data,
+        Err(_) => return Err(ApiErrors::InvalidJsonError)   };
+
+    let result = ClientPerson::update(persondata.0, *id, &conn)?;
+    Ok( JSON(result) )
+}
+
+#[allow(unused_variables)] 
+// Someday there will be more handling here
+#[error(404)] 
+fn not_found(req: &Request) -> ApiErrors {
+    ApiErrors::InvalidRequestError
 }
 
 
