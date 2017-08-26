@@ -23,6 +23,7 @@ use person::{Person, ClientPerson};
 use api_error::ApiError as ApiErrors;
 
 type GetPersonReply = Result<JSON<Person>,ApiErrors>;
+type DeltePersonReply = Result<String,ApiErrors>;
 type ParsedJsonPerson = Result<JSON<ClientPerson>, SerdeError>;
 
 #[get("/")]
@@ -76,6 +77,12 @@ fn update_person(id: UUID, persondata: ParsedJsonPerson, conn: db::Conn) -> GetP
     Ok( JSON(result) )
 }
 
+#[delete("/person/<id>")]
+fn delete_person(id: UUID, conn: db::Conn) -> DeltePersonReply {
+    let result = Person::delete(*id, &conn)?;
+    Ok( format!("{{'success':'{} rows deleted'}}",result) )
+}
+
 #[allow(unused_variables)] 
 // Someday there will be more handling here
 #[error(404)] 
@@ -87,6 +94,7 @@ fn not_found(req: &Request) -> ApiErrors {
 fn main() {
     rocket::ignite()
         .manage(db::init_pool())
-        .mount("/", routes![index,person,create_person,update_person])
+        .mount("/", routes![index,person,create_person,update_person,delete_person])
+        .catch(errors![not_found])
         .launch();
 }

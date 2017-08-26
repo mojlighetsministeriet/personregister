@@ -9,9 +9,10 @@ mod schema {
 }
 
 use self::schema::person;
-use self::schema::person::dsl::{person as personer};
+use self::schema::person::dsl::{person as personer,uuid as idcol};
 
 type PersonResult = Result<Person,diesel::result::Error>;
+type DeleteResult = Result<usize,diesel::result::Error>;
 
 #[derive(Serialize, Deserialize, //Serde json serialization
          Queryable,Insertable,Identifiable, // Diesel codegen
@@ -46,16 +47,22 @@ impl Person {
 
     }
 
-    pub fn get(id: Uuid, conn: &MysqlConnection) -> PersonResult {
-        let pers_id = id.hyphenated().to_string();
-        personer.find(&pers_id).limit(1).get_result::<Person>(conn)
-    }
-
     pub fn create(new_person: ClientPerson, name: String, conn: &MysqlConnection) ->  PersonResult {
         let (newcomer,new_id) = Person::new_from_client(new_person,name);
         diesel::insert(&newcomer).into(person::table).execute(conn)?;
         Person::get(new_id, conn)
     }
+
+    pub fn get(id: Uuid, conn: &MysqlConnection) -> PersonResult {
+        let pers_id = id.hyphenated().to_string();
+        personer.find(&pers_id).limit(1).get_result::<Person>(conn)
+    }
+
+    pub fn delete(id: Uuid, conn: &MysqlConnection) -> DeleteResult {
+        let pers_id = id.hyphenated().to_string();
+        diesel::delete(personer.filter(idcol.eq(pers_id))).execute(conn)
+    }
+
 
 }
 
