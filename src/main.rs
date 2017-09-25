@@ -35,9 +35,9 @@ fn index() -> &'static str {
 
           retrieves the content for the person with id `<id>`
 
-      PUT /person/<id> 
+      PUT /person/<id>
 
-          Updates properties of the person identified by the 
+          Updates properties of the person identified by the
           supplied id with the given values. Properties to be
           updated should be sent as json encoded property:value
           pairs.
@@ -63,13 +63,13 @@ fn create_person(persondata: ParsedJsonPerson, conn: db::Conn) -> GetPersonReply
         _                                => return Err(ApiErrors::EmptyNameError)   };
 
     let result = Person::create(persondata.0, new_name.unwrap(), &conn)?;
-    Ok( JSON(result) )    
+    Ok( JSON(result) )
 }
 
 
 #[put("/person/<id>", format = "application/json", data = "<persondata>")]
 fn update_person(id: UUID, persondata: ParsedJsonPerson, conn: db::Conn) -> GetPersonReply {
-    let persondata = match persondata { 
+    let persondata = match persondata {
         Ok(data)  => data,
         Err(_) => return Err(ApiErrors::InvalidJsonError)   };
 
@@ -83,9 +83,9 @@ fn delete_person(id: UUID, conn: db::Conn) -> DeltePersonReply {
     Ok( format!("{{'success':'{} rows deleted'}}",result) )
 }
 
-#[allow(unused_variables)] 
+#[allow(unused_variables)]
 // Someday there will be more handling here
-#[error(404)] 
+#[error(404)]
 fn not_found(req: &Request) -> ApiErrors {
     ApiErrors::InvalidRequestError
 }

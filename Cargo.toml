@@ -1,35 +1,37 @@
+#![feature(const_fn, drop_types_in_const)]
+
 [package]
 authors = ["Tobychev <tobychev@live.com>"]
 name = "personregister"
 version = "0.1.0"
 
 [dependencies]
-dotenv = "0.10.1"
+dotenv = "0.10"
 r2d2 = "0.7"
-rocket = "0.2.9"
-rocket_codegen = "0.2.9"
-serde = "0.9"
-serde_derive = "0.9"
-serde_json = "1.0.2"
+rocket = "0.3"
+rocket_codegen = "0.3"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"
 
 [dependencies.diesel]
 features = ["mysql"]
-version = "0.12.0"
+version = "0.16"
 
 [dependencies.diesel_codegen]
 features = ["mysql"]
-version = "0.12.0"
+version = "0.16"
 
 [dependencies.r2d2-diesel-mysql]
 # The real version is broken for mysql
 #version = "0.14"
-git = "https://github.com/Ameobea/r2d2-diesel" 
+git = "https://github.com/Ameobea/r2d2-diesel"
 
 [dependencies.rocket_contrib]
 default-features = false
 features = ["json", "uuid"]
-version = "0.2.9"
+version = "0.3"
 
 [dependencies.uuid]
 features = ["serde","v4"]
-version = "0.4.0"
+version = "0.5"
