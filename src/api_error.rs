@@ -3,6 +3,7 @@ use std::io::Cursor;
 use std::convert::From;
 use std::error::Error as StdError;
 
+use rocket::request::Request;
 use rocket::http::{Status, ContentType};
 use rocket::response::{Response,Responder};
 use diesel::result::Error as DieselError;
@@ -52,7 +53,7 @@ impl StdError for ApiError {
 }
 
 impl<'r> Responder<'r> for ApiError {
-    fn respond(self) -> Result<Response<'r>, Status> {
+    fn respond_to(self, _: &Request ) -> Result<Response<'r>, Status> {
         let (msg,stat) = match self {
             ApiError::RecordNotFound      => {("Record not found", Status::NotFound)},
             ApiError::UniqueViolation     => {("Unique key violation", Status::BadRequest)},
@@ -65,13 +66,12 @@ impl<'r> Responder<'r> for ApiError {
         };
         
         let resp = format!("{{'error':'{}'}}",msg);
-        Ok(
-            Response::build()
+        Response::build()
             .status(stat)
             .header(ContentType::JSON)
             .sized_body(Cursor::new(resp))
-            .finalize()
-        )
+            .ok()
+        
  
     }
 }

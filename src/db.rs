@@ -4,7 +4,7 @@ use std::ops::Deref;
 use r2d2;
 use dotenv::dotenv;
 use diesel::mysql::MysqlConnection;
-use r2d2_diesel_mysql::ConnectionManager;
+use r2d2_diesel::ConnectionManager;
 
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};

@@ -1,12 +1,13 @@
 #![feature(plugin, custom_derive, custom_attribute)]
 #![plugin(rocket_codegen)]
+#![recursion_limit="128"]
 
 extern crate uuid;
 extern crate rocket;
 extern crate rocket_contrib;
 extern crate serde_json;
 extern crate r2d2;
-extern crate r2d2_diesel_mysql;
+extern crate r2d2_diesel;
 extern crate dotenv;
 
 #[macro_use] extern crate diesel;
@@ -18,13 +19,13 @@ mod person;
 mod db;
 
 use rocket::Request;
-use rocket_contrib::{JSON, UUID, SerdeError};
+use rocket_contrib::{Json, UUID, SerdeError};
 use person::{Person, ClientPerson};
 use api_error::ApiError as ApiErrors;
 
-type GetPersonReply = Result<JSON<Person>,ApiErrors>;
+type GetPersonReply = Result<Json<Person>,ApiErrors>;
 type DeltePersonReply = Result<String,ApiErrors>;
-type ParsedJsonPerson = Result<JSON<ClientPerson>, SerdeError>;
+type ParsedJsonPerson = Result<Json<ClientPerson>, SerdeError>;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -47,7 +48,7 @@ fn index() -> &'static str {
 #[get("/person/<id>")]
 fn person(id: UUID, conn: db::Conn) -> GetPersonReply {
     let result = Person::get(*id, &conn)?;
-    Ok(JSON(result))
+    Ok(Json(result))
 }
 
 
@@ -63,7 +64,7 @@ fn create_person(persondata: ParsedJsonPerson, conn: db::Conn) -> GetPersonReply
         _                                => return Err(ApiErrors::EmptyNameError)   };
 
     let result = Person::create(persondata.0, new_name.unwrap(), &conn)?;
-    Ok( JSON(result) )    
+    Ok( Json(result) )    
 }
 
 
@@ -74,7 +75,7 @@ fn update_person(id: UUID, persondata: ParsedJsonPerson, conn: db::Conn) -> GetP
         Err(_) => return Err(ApiErrors::InvalidJsonError)   };
 
     let result = ClientPerson::update(persondata.0, *id, &conn)?;
-    Ok( JSON(result) )
+    Ok( Json(result) )
 }
 
 #[delete("/person/<id>")]
